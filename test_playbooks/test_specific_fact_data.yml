@@ -1,0 +1,8 @@
+---
+  - hosts : localhost
+    remote_user : root
+    tasks :
+    - name : gather site specific fact data
+      action : site_facts
+    - shell : echo 'this is my name{{myname}}'
+      when : myname == 'sotkang'

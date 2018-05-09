@@ -1,0 +1,10 @@
+---
+  - hosts : localhost
+    remote_user : root
+    vars_files :
+      - ./vars/users.yml
+
+    tasks :
+    - name : print name and telephone
+      debug : msg="User {{item.key}} is {{ item.value.name }}({{ item.value.telephone }})"   
+      with_dict : "{{users}}"

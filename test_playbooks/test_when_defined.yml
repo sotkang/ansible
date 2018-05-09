@@ -1,0 +1,16 @@
+---
+  - hosts : localhost
+    remote_user : root
+    vars :
+      foo : 100
+      bar : 200
+    tasks :
+    - shell : echo "i have {{foo}}"
+      when : foo is defined
+
+    - fail : msg="there is not bar"
+      when : bar is not defined
+
+    - command : echo {{ item }}
+      with_items : [0,2,4,6,8,10]
+      when : item > 5

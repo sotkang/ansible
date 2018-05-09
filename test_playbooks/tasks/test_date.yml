@@ -1,0 +1,6 @@
+---
+  - name : show date
+    command : date
+
+
+

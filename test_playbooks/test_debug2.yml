@@ -1,0 +1,12 @@
+---
+  - hosts : localhost
+    remote_user : root
+    vars : 
+      url : "http://simlinux.com/users/foo/resources/bar"
+
+    tasks :
+      - debug : "msg='matched pattern 1'"
+        when : url|match("http://simlinux.com/users/.*/resources/.*")
+
+      - debug : "msg='matched pattern 2'"
+        when : url|search("/users/.*/resources/.*")

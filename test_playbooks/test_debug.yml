@@ -1,0 +1,12 @@
+---
+  - hosts: localhost
+    remote_user: root
+    tasks:
+    - name: Command run line
+      shell : date
+      register : result
+    - name : Show debug info
+      debug : var=result verbosity=0
+
+
+      

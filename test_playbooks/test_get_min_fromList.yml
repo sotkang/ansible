@@ -1,0 +1,7 @@
+---
+  - hosts : localhost
+    vars :
+    - test : [1,2,3,4,5,6]
+    tasks :
+    - name : vars
+      template : src=p.j2 dest=/tmp/p.txt

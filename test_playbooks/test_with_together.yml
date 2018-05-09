@@ -1,0 +1,11 @@
+---
+  - hosts : localhost
+    remote_user : root
+    vars_files :
+      - ./vars/list_test.yml
+
+    tasks :
+      - debug : msg="{{ item.0 }} and {{ item.1 }}"
+        with_together :
+          - "{{ alpha }}"
+          - "{{ numbers }}"

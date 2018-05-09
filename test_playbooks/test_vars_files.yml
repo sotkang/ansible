@@ -1,0 +1,12 @@
+---
+  - hosts : localhost
+    vars :
+      name : sot
+    vars_files : 
+      - ./vars/external_vars.yml
+
+    tasks :
+      - name : "data is exist"
+        debug : var=password verbosity=0
+      - name : "data is not exist"
+        debug : var=pssword verbosity=0

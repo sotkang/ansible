@@ -1,0 +1,14 @@
+---
+  - hosts : ubuntu
+    remote_user : root
+    tasks :
+    - name : 'echo hostname'
+      shell : 'echo $HOSTNAME'
+      register : result
+
+    - name : Show the result
+      debug : var=result verbosity=0
+
+    - name : Show the remote mem
+      debug : var=ansible_memory_mb.real.total verbosity=0
+        
