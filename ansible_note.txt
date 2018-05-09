@@ -1,0 +1,69 @@
+@安装
+基础安装不做介绍：详看http://www.ansible.com.cn/docs/intro_getting_started.html。
+
+@启动
+安装好后进入目录
+执行下命令启动
+source ./hacking/env-setup
+执行脚本evn-setup时会读取默认的主机清单文件/etc/ansible/hosts
+主机清单文件路径可以通过环境变量ANSIBLE_HOSTS设置或者执行ansible 时-i参数指定
+
+	
+@基础配置
+然后新建一个/etc/ansible/hosts。编辑它，里面写入你要远程连接的主机ip。这里要用root
+通过git的方式来安装连ansible.cfg都没有。这个也是新建的。即使在你source了后，再新建这个配置，它也会在你执行命令的时候读取这个配置
+然后配置ssh免密登陆。http://www.jb51.net/article/94599.htm。
+在配置免密的时候，就是加centos7上的公钥放到ubuntu和testSever上的authorized_keys中（ssh-copy-id -i ~/.ssh/id_rsa.pub ubuntu就行了）。testSever到还好。只是ubuntu除了apt-get install openssh-server和service ssh start以外，可能还要修改下vim /etc/ssh/sshd_config中PermitRootLogin yes （改成yes）
+
+@第一条命令
+配置这里是用的root，之后的命令的话ansible 不一定要用root来操作。但是经过测试，之前用root来配置的免密登陆，需要用root来启动执行ansible才行。
+配置好后可以执行一些基础命令：
+通配模式Patterns
+ansible <pattern_goes_here> -m <module_name> -a <arguments>
+
+ansible all -m ping  （ping远程主机）
+ansible all -a "/sbin/ifconfig"  （通过控制机在远程主机上执行ifconfig，结果显示在控制机上）
+
+@Ad-Hoc简要说明
+ansible有许多模块,默认是 ‘command’,也就是命令模块,我们可以通过 -m 选项来指定不同的模块.在前面所示的例子中, 因为我们是要在 Atlanta 组下的服务器中执行 reboot 命令,所以就不需要显示的用这个选项指定 ‘command’ 模块,使用 默认设定就OK了.一会在其他例子中,我们会使用 -m 运行其他的模块。
+这是 /usr/bin/ansible 的另一种用法.Ansible 能够以并行的方式同时 SCP 大量的文件到多台机器. 命令如下:
+ansible atlanta -m copy -a "src=/etc/hosts dest=/tmp/hosts"
+
+默认情况下ansible使用的module是command，这个模块并不支持shell变量和管道，若想使用shell来执行模块，请使用-m参数指定shell模块。
+ansible releigh -m shell -a 'echo $TERM'
+ansible all -m copy -a 'src=./test.log dest=/tmp/test_ansible/'
+
+搜集主机的所有系统信息
+ansible all -m setup
+搜集系统信息并以主机名为文件名分别保存在/tmp/facts目录
+ansible all -m setup --tree /tmp/facts
+搜集和内存相关的信息
+ansible all -m setup -a 'filter=ansible_*_mb'
+搜集和网卡相关的信息
+ansible all -m setup -a 'filter=ansible_eth[0-2]'
+
+
+@playbook简要说明
+关于roles的例子：https://www.cnblogs.com/zhaojiankai/p/7655855.html
+
+---
+  - hosts : '{{hosts}}'
+    remote_user : '{{user}}'
+    tasks :
+      
+如下可以传递{{hosts}},{{user}}变量
+ansible-playbook release.yml --extra-vars "hosts=vipers user=starbuck"
+ansible1.2可以使用JSON数据来传递变量
+--extra-vars '{"pacman":"mrs","ghosts":["inky","pinky","sue"]}'
+ansible 1.3可以使用@导入JSON文件来传递变量
+--extra-vars "@some_file.json"
+
+可以通过在远程主机/etc/ansible/facts.d/目下创建以.fact结尾的文件，也可以是json，ini或者返回json格式数据的可执行文件，这些将被作为远程主机本地的facts执行
+/etc/ansible/facts.d/hello.fact
+[test]
+h=hello
+p=world
+ansible remote_ip -m setup -a 'filter=ansible_local'
+可以通过{{ ansible_local.preferences.test.h }}方式来使用该变量
+
+在 playbook 中，notify 行为在每个任务执行的最后会被触发调用 handlers，并且即使 notify 多个任务也只是被触发一次；handlers 是任务列表和普通任务没有区别，通过 notify 触发使用 name 来引用；在一个 play 里面无论对一个 handlers 通知调用多少次，都只是在所有任务执行完后执行一次；
